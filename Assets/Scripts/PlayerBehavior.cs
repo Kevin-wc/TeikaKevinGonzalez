@@ -3,7 +3,10 @@ using UnityEngine.InputSystem;
 
 public class PlayerBehavior : MonoBehaviour
 {
-    public float speed = 5.0f;
+    public float speed = -60f;
+    public GameObject fruit;
+    private GameObject currentFruit;
+    public float offY = -0.6f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
 
@@ -15,32 +18,43 @@ public class PlayerBehavior : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Keyboard.current.leftArrowKey.isPressed)
+        //fruit position below player.
+        if (currentFruit != null)
         {
-            Vector3 newPos = transform.position;
-            newPos.x -= speed;
-            transform.position = newPos;
+            Vector3 playerPos = transform.position;
+            Vector3 fruitOffset = new Vector3(0.0f, offY, 0.0f);
+            currentFruit.transform.position = playerPos + fruitOffset;
+        }
+        else
+        {
+            currentFruit = Instantiate(fruit, new Vector3(0.0f, offY, 0.0f), Quaternion.identity);
         }
 
-        if (Keyboard.current.rightArrowKey.isPressed)
+        // Drop fruit
+        if (Keyboard.current.spaceKey.wasPressedThisFrame)
         {
-            Vector3 newPos = transform.position;
-            newPos.x += speed;
-            transform.position = newPos;
+            Rigidbody2D body = currentFruit.GetComponent<Rigidbody2D>();
+            body.gravityScale = 1.0f;
+
+            Collider2D collider = currentFruit.GetComponent<Collider2D>();
+            collider.enabled = true;
+
+            currentFruit = null;
         }
 
-        if (Keyboard.current.Akey.isPressed)
-        {
-            Vector3 newPos = transform.position;
-            newPos.x -= speed;
-            transform.position = newPos;
-        }
+        float offset = 0.0f;
 
-        if (Keyboard.current.Dkey.isPressed)
+        if (Keyboard.current.leftArrowKey.isPressed || Keyboard.current.aKey.isPressed)
         {
-            Vector3 newPos = transform.position;
-            newPos.x += speed;
-            transform.position = newPos;
+            offset -= speed;
         }
+        if (Keyboard.current.rightArrowKey.isPressed || Keyboard.current.dKey.isPressed)
+        {
+            offset += speed;
+        }
+        Vector3 newPos = transform.position;
+        newPos.x = transform.position.x + offset;
+        transform.position = newPos;
+
     }
 }
